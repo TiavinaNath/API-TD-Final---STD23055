@@ -1,0 +1,266 @@
+openapi: 3.0.3
+
+info:
+  title: Competition Football Manager API - STD23055
+  description: API for managing Soccer competitions, teams, and players.
+  version: 1.0.0
+  
+servers:
+  - url: https://localhost.std23055.com
+
+paths:
+  /competitions:
+    get:
+      summary: Get a list of competitions
+      parameters:
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: A list of competitions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetitionList'
+        '400':
+          description: Bad request
+
+  /competitions/{competitionId}:
+    get:
+      summary: Get a competition by ID
+      parameters:
+        - name: competitionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Details of the competition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competition'
+        '404':
+          description: Competition not found
+
+  /teams:
+    get:
+      summary: Get a list of teams
+      parameters:
+        - name: teamName
+          in: query
+          schema:
+            type: string
+            description: Filter teams by their name
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: A list of teams
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamList'
+        '400':
+          description: Bad request
+
+  /teams/{teamId}:
+    get:
+      summary: Get a team by ID
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Details of the team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '404':
+          description: Team not found
+
+  /teams/{teamId}/players:
+    get:
+      summary: Get players of a specific team
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: playerName
+          in: query
+          schema:
+            type: string
+            description: Filter players by their name
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: pageSize
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: A list of players for the team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerList'
+        '400':
+          description: Bad request
+        '404':
+          description: Team not found
+
+  /teams/{teamId}/players:
+    post:
+      summary: Add players to a team
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: List of players to be added to the team
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Player'
+      responses:
+        '200':
+          description: Players added to the team successfully
+        '400':
+          description: Bad request
+        '404':
+          description: Team not found
+
+components:
+  schemas:
+    Competition:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        location:
+          type: string
+      required:
+        - id
+        - name
+        - location
+
+    CompetitionList:
+      type: object
+      properties:
+        competitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Competition'
+        totalCount:
+          type: integer
+          description: Total number of competitions available
+      required:
+        - competitions
+        - totalCount
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slogan:
+          type: string
+        competitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Competition'
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/Player'
+      required:
+        - id
+        - name
+        - slogan
+
+    TeamList:
+      type: object
+      properties:
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/Team'
+        totalCount:
+          type: integer
+          description: Total number of teams available
+      required:
+        - teams
+        - totalCount
+
+    Player:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        number:
+          type: integer
+        strongFoot:
+          type: string
+          enum: [Left, Right]
+      required:
+        - id
+        - name
+        - number
+        - strongFoot
+
+    PlayerList:
+      type: object
+      properties:
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/Player'
+        totalCount:
+          type: integer
+          description: Total number of players available
+      required:
+        - players
+        - totalCount
